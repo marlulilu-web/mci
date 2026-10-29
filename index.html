@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Qual vs Quant Arena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f3ee;--card:#fff;--ink:#1c2733;--mute:#66707a;--ql:#0f766e;--qn:#c2410c;--line:#ddd8cf;--ok:#15803d;--bad:#b91c1c;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141b22;--card:#1e2832;--ink:#eee9e0;--mute:#9aa5af;--ql:#2dd4bf;--qn:#fb923c;--line:#33404c;--ok:#4ade80;--bad:#f87171;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141b22;--card:#1e2832;--ink:#eee9e0;--mute:#9aa5af;--ql:#2dd4bf;--qn:#fb923c;--line:#33404c;--ok:#4ade80;--bad:#f87171;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;padding:24px 18px 60px}
+.w{max-width:980px;margin:0 auto}
+h1{font:400 38px Georgia,serif;margin:0 0 6px}h2{font:400 26px Georgia,serif;margin:0 0 10px}
+.sub{color:var(--mute);margin:0 0 22px;font-size:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+button{font:600 16px Arial,sans-serif;padding:12px 20px;border-radius:11px;border:0;background:var(--ql);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){button.pri{color:#0b1217}}
+button.g{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:disabled{cursor:default}.ans button:disabled{opacity:1}.ans button.dim:disabled{opacity:.35}
+input{font:16px Arial;padding:10px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--ink);width:100%}
+label{display:block;font-size:13px;color:var(--mute);margin:12px 0 6px}
+.bar{display:flex;justify-content:space-between;align-items:center;color:var(--mute);font-size:15px;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.q{font:400 30px/1.35 Georgia,serif;margin:6px 0 22px}
+.ans{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ans button{font-size:24px;padding:30px 10px;border-radius:14px}
+.bq{background:var(--ql)}.bn{background:var(--qn)}
+.ans button.dim{opacity:.35}.ans button.pick{outline:5px solid var(--ink)}
+.tm{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:18px}.tm i{display:block;height:100%;background:var(--ql);width:100%}
+.fb{margin-top:18px;padding:16px;border-radius:12px;border:1px solid var(--line);font-size:17px;line-height:1.5}
+.fb b.ok{color:var(--ok)}.fb b.no{color:var(--bad)}
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:18px}
+.team{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card)}
+.team .n{font-weight:700}.team .s{font:400 34px Georgia,serif}
+.team button{padding:6px 10px;font-size:13px;margin-right:4px}
+.big{font:400 72px Georgia,serif;margin:8px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.hide{display:none}
+ol.lb{padding-left:22px;font-size:20px;line-height:1.9}
+</style></head><body><div class="w">
+
+<div id="home">
+ <h1>Qual vs Quant Arena</h1>
+ <p class="sub">Is this project best approached qualitatively or quantitatively? Decide fast, defend your choice.</p>
+ <div class="modes">
+  <div class="card"><h2>Team battle</h2><p class="sub">Run it on the projector. Teams of 4 discuss, then show their answer (hold up a card or a hand: Qual or Quant). You reveal and award points.</p>
+   <label for="nt">Number of teams</label><input id="nt" type="number" min="2" max="12" value="6">
+   <div class="row"><button class="pri" id="goTeam">Start team battle</button></div></div>
+  <div class="card"><h2>Solo sprint</h2><p class="sub">On your own device: 100 points per correct answer plus up to 50 for speed. 12 projects, 20 seconds each.</p>
+   <label for="nm">Your name</label><input id="nm" placeholder="e.g. Anna" maxlength="24">
+   <div class="row"><button class="pri" id="goSolo">Start solo sprint</button></div></div>
+ </div>
+</div>
+
+<div id="play" class="hide">
+ <div class="bar"><span id="prog"></span><span id="tinfo"></span><button class="g" id="quit">Quit</button></div>
+ <div class="tm"><i id="tbar"></i></div>
+ <div class="card">
+  <div class="sub" style="margin:0">Project brief</div>
+  <div class="q" id="qtext"></div>
+  <div class="ans"><button class="bq" data-a="qual">Qualitative</button><button class="bn" data-a="quant">Quantitative</button></div>
+  <div class="fb hide" id="fb"></div>
+  <div class="row"><button id="reveal" class="g hide">Reveal answer</button><button id="next" class="hide">Next project →</button></div>
+ </div>
+ <div class="teams hide" id="teams"></div>
+</div>
+
+<div id="end" class="hide">
+ <h1 id="endT">Done!</h1><div class="big" id="endS"></div><p class="sub" id="endM"></p>
+ <div id="board"></div>
+ <div class="row"><button id="again">Play again</button></div>
+</div>
+</div>
+<script>
+const Q=[
+["A retailer wants to know whether a 10% price cut increased monthly sales across 200 stores.","quant","Causal effect across many units: compare numbers statistically."],
+["A hospital wants to understand how nurses experience a new AI scheduling tool in daily work.","qual","Experience and meaning in context call for interviews or observation."],
+["A firm tests whether remote work raises productivity, using output data from 5,000 employees.","quant","Large sample, measurable outcome, relationship between variables."],
+["Researchers explore how founders make sense of failure after their start-up shut down.","qual","Sense-making is a ‘how’ and ‘why’ question about meanings, best explored in depth."],
+["A ministry needs the share of Austrian households that own an e-bike.","quant","A count or distribution in a population needs a representative sample."],
+["Little theory exists on why middle managers resist a new sustainability policy. What is going on?","qual","Exploratory, limited theory, open question: build understanding from rich data."],
+["A marketing team asks whether higher ad frequency causes more clicks (A/B test).","quant","Controlled comparison with a measurable outcome."],
+["How do gig drivers experience algorithmic management in their everyday routines?","qual","Lived experience and practices, in the participants’ own words."],
+["A consultancy compares average guest satisfaction scores across three hotel chains.","quant","Comparing measured scores across groups."],
+["What meanings do students attach to using ChatGPT for coursework? (Our course project!)","qual","Meanings and perceptions: interviews and focus groups, then thematic analysis."],
+["An HR team predicts employee turnover from tenure, pay and engagement scores.","quant","Relationships between variables, statistical prediction."],
+["How does a family firm negotiate succession across generations?","qual","A complex, sensitive process in one setting: in-depth, context-rich inquiry."]];
+const $=id=>document.getElementById(id);
+let mode,i,order,score,teams,locked,t0,timer,TL=20,res=[],streak=0,picked;
+function show(id){['home','play','end'].forEach(x=>$(x).classList.toggle('hide',x!==id))}
+function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+function start(m){mode=m;i=0;score=0;streak=0;order=shuffle(Q);res=[];show('play');
+ $('teams').classList.toggle('hide',m!=='team');
+ if(m==='team'){const n=Math.max(2,Math.min(12,+$('nt').value||6));teams=Array.from({length:n},(_,k)=>({n:'Team '+(k+1),s:0}));drawTeams()}
+ TL=m==='team'?45:20;ask()}
+function drawTeams(){const t=$('teams');t.innerHTML='';teams.forEach((x,k)=>{const d=document.createElement('div');d.className='team';
+ d.innerHTML='<div class="n"></div><div class="s"></div><div class="row" style="margin-top:6px"><button class="g" data-k="'+k+'" data-d="1">+1</button><button class="g" data-k="'+k+'" data-d="-1">−1</button></div>';
+ d.querySelector('.n').textContent=x.n;d.querySelector('.s').textContent=x.s;t.appendChild(d)})}
+function ask(){locked=false;picked=null;const q=order[i];$('qtext').textContent=q[0];$('prog').textContent='Project '+(i+1)+' of '+order.length;
+ $('fb').classList.add('hide');$('next').classList.add('hide');$('reveal').classList.toggle('hide',mode!=='team');
+ document.querySelectorAll('.ans button').forEach(b=>{b.className=b.dataset.a==='qual'?'bq':'bn';b.disabled=mode==='team'?true:false});
+ $('tinfo').textContent=mode==='solo'?'Score: '+score+(streak>1?'  ·  streak '+streak:''):'Discuss in your team, then show your card';
+ t0=Date.now();clearInterval(timer);timer=setInterval(tick,100);tick()}
+function tick(){const el=(Date.now()-t0)/1000,f=Math.max(0,1-el/TL);$('tbar').style.width=(f*100)+'%';
+ if(el>=TL){clearInterval(timer);if(mode==='solo'&&!locked)answer(null);}}
+function answer(a){if(locked)return;locked=true;clearInterval(timer);const q=order[i],ok=a===q[1],el=(Date.now()-t0)/1000;
+ let pts=0;if(ok){pts=100+Math.round(Math.max(0,1-el/TL)*50);streak++}else streak=0;score+=pts;res.push(ok);
+ document.querySelectorAll('.ans button').forEach(b=>{b.disabled=true;if(b.dataset.a===q[1])b.classList.add('pick');else b.classList.add('dim')});
+ const fb=$('fb');fb.classList.remove('hide');fb.innerHTML='';
+ const h=document.createElement('b');h.className=mode==='solo'?(ok?'ok':'no'):'';
+ h.textContent=mode==='solo'?(a===null?'Time’s up. ':(ok?'Correct! +'+pts+'. ':'Not this time. ')):'';
+ fb.appendChild(h);fb.appendChild(document.createTextNode('Best fit: '+(q[1]==='qual'?'Qualitative':'Quantitative')+'. '+q[2]+' Could the other approach add something? Discuss.'));
+ $('reveal').classList.add('hide');$('next').classList.remove('hide');$('next').textContent=i===order.length-1?'Finish':'Next project →';
+ $('tinfo').textContent=mode==='solo'?'Score: '+score+(streak>1?'  ·  streak '+streak:''):'Award points to the teams that got it right'}
+document.querySelectorAll('.ans button').forEach(b=>b.onclick=()=>{if(mode==='solo')answer(b.dataset.a)});
+$('reveal').onclick=()=>answer('team');
+$('next').onclick=()=>{i++;if(i>=order.length)finish();else ask()};
+$('teams').onclick=e=>{const b=e.target.closest('button');if(!b)return;teams[+b.dataset.k].s+=+b.dataset.d;drawTeams()};
+$('quit').onclick=()=>{clearInterval(timer);show('home')};
+function finish(){clearInterval(timer);show('end');const bd=$('board');bd.innerHTML='';
+ if(mode==='solo'){const n=($('nm').value||'Player').trim();$('endT').textContent='Well played, '+n+'!';$('endS').textContent=score+' pts';
+  const c=res.filter(Boolean).length;$('endM').textContent=c+' of '+res.length+' correct. '+(c>=10?'Method expert!':c>=7?'Solid instincts.':'Worth another round: the trick is matching question type to method.');
+  let best=0;try{best=+localStorage.getItem('qqbest')||0;if(score>best){localStorage.setItem('qqbest',score);best=score}}catch(e){}
+  if(best)bd.innerHTML='<p class="sub">Your best on this device: '+best+' pts</p>'}
+ else{const s=teams.slice().sort((a,b)=>b.s-a.s);$('endT').textContent='Winner: '+s[0].n;$('endS').textContent=s[0].s+' pts';$('endM').textContent='Final standings';
+  const ol=document.createElement('ol');ol.className='lb';s.forEach(x=>{const l=document.createElement('li');l.textContent=x.n+' · '+x.s+' pts';ol.appendChild(l)});bd.appendChild(ol)}}
+$('goTeam').onclick=()=>start('team');$('goSolo').onclick=()=>start('solo');$('again').onclick=()=>show('home');
+</script></body></html>
