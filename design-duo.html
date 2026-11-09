@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Design Duel · Qualitative Research Quiz</title>
+<style>
+:root{--bg:#f6f4ef;--cd:#fff;--tx:#1d2330;--mu:#5d6679;--ac:#2f5d8a;--bd:#d9d6cc;--g3:#2e7d4f;--g2:#b7791f;--g1:#8a6d3b;--g0:#b23a48}
+@media(prefers-color-scheme:dark){:root{--bg:#161a22;--cd:#1f2530;--tx:#eceff4;--mu:#9aa5b8;--ac:#7fb0e0;--bd:#323a49;--g3:#5cc08a;--g2:#e0b04f;--g1:#c4a56a;--g0:#ef7b88}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 Georgia,'Times New Roman',serif}
+#app{max-width:880px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:2rem;margin:.2em 0}h2{font-size:1.25rem;margin:0 0 .4em}p{margin:.3em 0}
+.mu{color:var(--mu)}.card{background:var(--cd);border:1px solid var(--bd);border-radius:12px;padding:16px;margin:12px 0}
+button,select,input{font:inherit;color:inherit}
+button{background:var(--cd);border:1px solid var(--bd);border-radius:8px;padding:9px 12px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--ac)}button:disabled{opacity:.45;cursor:default}
+.go{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:bold;padding:11px 20px}
+input,select{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:7px 9px}
+.seg{display:flex;gap:8px;margin:6px 0}.seg button{flex:1}.seg .on{border-color:var(--ac);background:var(--ac);color:var(--bg)}
+.f{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0}.f label{display:flex;flex-direction:column;font-size:.85rem;color:var(--mu);gap:3px}
+.top{display:flex;justify-content:space-between;font-weight:bold}.bar{height:8px;background:var(--bd);border-radius:4px;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:var(--ac);width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.chips b{font:600 .8rem system-ui,sans-serif;background:var(--bg);border:1px dashed var(--ac);border-radius:99px;padding:3px 10px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}.opts button{padding:14px}
+.tr{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}.tn{width:110px;font-weight:bold}.tr button{flex:1;min-width:90px;padding:8px 4px;font-size:.85rem}
+.row{border-left:5px solid var(--bd);background:var(--cd);padding:8px 12px;margin:8px 0;border-radius:0 8px 8px 0}
+.row p{color:var(--mu);font-size:.92rem}.row em{font:600 .75rem system-ui,sans-serif;text-transform:uppercase;margin-left:8px}
+.r3{border-color:var(--g3)}.r3 em{color:var(--g3)}.r2{border-color:var(--g2)}.r2 em{color:var(--g2)}.r1{border-color:var(--g1)}.r1 em{color:var(--g1)}.r0{border-color:var(--g0)}.r0 em{color:var(--g0)}
+.who{margin-left:10px;font-size:.9rem;color:var(--ac)}
+table{width:100%;border-collapse:collapse}td,th{padding:7px;border-bottom:1px solid var(--bd);text-align:left}
+</style></head><body><div id="app"></div>
+<script>
+const O=["Case study","Ethnography","Grounded theory","Narrative research","Action research","Phenomenology"];
+const L=["Poor fit","Stretch","Defensible","Strongest fit"],PT=[0,2,6,10];
+const D=["Doesn’t match the question or the access you have.","A stretch: you’d have to argue hard for it given the access listed."];
+// r = rating per design in O order (3 strongest, 2 defensible, 1 stretch, 0 poor); n = argument for rated 2–3 options
+const S=[
+{t:"Gig workers and the algorithm",c:"A delivery platform’s app assigns jobs and rates riders automatically. You want to know: how do gig workers experience algorithmic management?",a:["Riders willing to be interviewed","Platform is closed to outsiders","Only a few weeks"],r:[1,2,2,1,0,3],n:{5:"The question is about the lived experience of a shared phenomenon. In-depth interviews with 5–25 riders fit directly.",1:"Defensible if you can ride along and watch the app in use. Access and time make it harder.",2:"Defensible if you argue little theory exists and you want to build a process explanation."}},
+{t:"The grocery store floor",c:"How do frontline staff make their everyday jobs meaningful in a busy supermarket?",a:["Manager lets you work the shop floor","Six months available","Staff happy to chat"],r:[1,3,1,0,0,2],n:{1:"Long participant observation of routines, norms and interruptions is the core of ethnography.",5:"Defensible: the published study pairs ethnography with a phenomenological lens. Design and analytic orientation can overlap."}},
+{t:"Disclosing the invisible",c:"Neurodivergent employees decide whether to disclose to colleagues. You want to understand how those stories unfold and get retold at work.",a:["Employees willing to share life stories","Personal journals available","Condition is invisible, so no observing"],r:[1,0,1,3,0,2],n:{3:"Personal stories in a social context, meaning-making and identity: collect, restory, and often order chronologically.",5:"Defensible if you care more about what disclosure feels like across 8–15 people than about story arcs."}},
+{t:"Absenteeism at school",c:"A school wants to reduce absenteeism and invites you to work with teachers on it this semester.",a:["Leadership wants change","Teachers will take part","Interventions are allowed"],r:[1,0,0,0,3,0],n:{4:"There is a practical problem, practitioners are partners, and the process cycles through diagnose, plan, act, evaluate."}},
+{t:"A failed digital transformation",c:"Why did one firm’s ERP rollout collapse? Technology and organisational context are hard to separate.",a:["Internal documents and emails","12 managers to interview","One bounded organisation"],r:[3,1,2,0,0,1],n:{0:"A contemporary phenomenon in a real-life context with blurry boundaries, studied with triangulated sources.",2:"Defensible if existing theory explains little and you aim to build a theory of how failure unfolds."}},
+{t:"The workload puzzle",c:"How do employees negotiate expectations of performance when workloads keep growing? The literature offers no good framework.",a:["Open-ended survey from 47 staff","10 follow-up interviews","Time to iterate"],r:[2,0,3,0,0,1],n:{2:"Open question, thin prior theory, iterative coding and constant comparison to build a model.",0:"Defensible if you bound it to one organisation and care about context more than theory."}},
+{t:"Outlanders at work",c:"What does belonging, recognition and exclusion feel like for foreign IT professionals in German firms?",a:["11 volunteers who share the experience","Semi-structured interviews only","No access to workplaces"],r:[0,1,1,2,0,3],n:{5:"Subjective, lived experience of the same phenomenon, analysed for significant statements and themes.",3:"Defensible if you follow a few individuals’ stories and restory them."}},
+{t:"The founder’s story",c:"One entrepreneur’s career has shaped a whole industry. You want to capture how she makes sense of it.",a:["Only she agrees to take part","Diaries and oral-history recordings","Years of material"],r:[2,0,0,3,0,1],n:{3:"Narrative research suits one life or a handful. It uses multiple sources, context and restorying.",0:"Defensible as a single intrinsic case if you can justify why she is unique or critical."}},
+{t:"Remote team, chat logs only",c:"How do norms of collaboration emerge in a fully remote team? You have no physical presence.",a:["Slack and WhatsApp archives","Team consents","No site visits"],r:[2,2,2,1,0,0],n:{0:"A bounded team with documents as data. Triangulate with a few interviews.",1:"Defensible as digital ethnography if you can observe the channels live over time.",2:"Defensible if you code the logs openly to build a theory of norm formation."}},
+{t:"Students and AI support",c:"How do students perceive AI-enabled support for their education? (The course’s own project question.)",a:["Students willing to be interviewed","Your lecturer is a co-author","Limited time"],r:[1,1,1,1,2,3],n:{5:"Closest fit: subjective experience of a shared phenomenon via in-depth interviews.",4:"Defensible only if teachers and students co-design and test AI support together, so you intervene rather than just ask."}},
+{t:"Hybrid work policy",c:"HR wants to design and test a hybrid-work policy with three teams over six months and learn from it.",a:["HR sponsorship","Teams are partners","Several review cycles possible"],r:[2,1,1,0,3,1],n:{4:"Collaborative, problem-driven, iterative: research in action, not about action.",0:"Defensible if you only describe how the policy plays out in depth without shaping it."}},
+{t:"A black swan?",c:"Textbooks say markets are rational and competitive. You suspect local power networks undermine this in one city’s planning.",a:["Council insiders","Public records","Years of access"],r:[3,2,1,1,0,0],n:{0:"One critical, extreme case can falsify a general claim, the ‘black swan’ logic.",1:"Defensible if you embed for years and watch how power works in practice."}},
+{t:"LEGO at the software micro-business",c:"What can LEGO building as a method reveal about how affect shows up at work?",a:["Nine months with a small firm","Workshops and one-to-one interviews allowed","Filming and photos allowed"],r:[2,3,0,0,0,1],n:{1:"Prolonged immersion plus workshops and interviews. Culture and practice in a natural setting.",0:"Defensible: the micro-business is a bounded system studied with mixed sources."}}
+];
+const $=s=>document.querySelector(s);let G=null,timer=null,M='i',NT=3;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const best=()=>{try{return localStorage.getItem('dd_best')}catch(e){return null}};
+
+function setup(){
+ clearInterval(timer);const b=best();
+ let h=`<h1>Design Duel</h1><p class=mu>Pick the research design that fits the context. Several designs can be defended, so the best argument wins. Based on Session 2: Approaches to qualitative inquiry.</p>
+ <div class=card><div class=seg><button class="${M=='i'?'on':''}" onclick="M='i';setup()">Individual</button><button class="${M=='t'?'on':''}" onclick="M='t';setup()">Teams (shared screen)</button></div>`;
+ if(M=='t'){h+=`<div class=f><label>Teams<select id=nt onchange="NT=+this.value;setup()">${[2,3,4,5,6].map(n=>`<option ${n==NT?'selected':''}>${n}</option>`).join('')}</select></label></div><div class=f>${Array.from({length:NT},(_,i)=>`<label>Team ${i+1}<input class=pn value="Team ${i+1}" maxlength=16></label>`).join('')}</div>`}
+ else h+=`<div class=f><label>Your name<input class=pn value="Player" maxlength=16></label></div>`;
+ h+=`<div class=f><label>Rounds<select id=rn><option>5</option><option selected>8</option><option value=${S.length}>All (${S.length})</option></select></label>
+ <label>Seconds per round<select id=sc><option>30</option><option>45</option><option selected>60</option><option>90</option></select></label></div>
+ <button class=go onclick="start()">Start</button></div>
+ <div class="card mu"><b>Scoring:</b> strongest fit 10, defensible 6, stretch 2, poor fit 0. A defensible-or-better pick earns up to +3 for speed. Teams: the host can award +1 for the best spoken argument each round.${b?`<br>Your best individual score on this device: ${esc(b)}`:''}</div>`;
+ $('#app').innerHTML=h;
+}
+function start(){
+ const ns=[...document.querySelectorAll('.pn')].map(i=>i.value.trim()||'Player');
+ const n=+$('#rn').value,sec=+$('#sc').value;
+ const q=[...S].sort(()=>Math.random()-.5).slice(0,n);
+ G={mode:M,pl:ns.map(x=>({n:x,s:0,h:[]})),q,i:0,sec,ch:[],tl:[],rev:false,hb:[],t0:Date.now()};
+ render();clearInterval(timer);timer=setInterval(tick,200);
+}
+function left(){return Math.max(0,G.sec-(Date.now()-G.t0)/1000)}
+function tick(){if(!G||G.rev)return;const l=left();
+ const t=$('#tm'),f=$('#bf');if(t)t.textContent=Math.ceil(l)+'s';if(f)f.style.width=(l/G.sec*100)+'%';
+ if(l<=0)reveal()}
+function pick(j,k){if(G.rev||G.ch[j]!=null)return;G.ch[j]=k;G.tl[j]=left();
+ if(G.pl.every((_,x)=>G.ch[x]!=null))reveal();else render()}
+function render(){
+ const g=G,s=g.q[g.i];
+ let h=`<div class=top><span>Round ${g.i+1}/${g.q.length}</span><span id=tm></span></div><div class=bar><i id=bf></i></div>
+ <div class=card><h2>${s.t}</h2><p>${s.c}</p><div class=chips>${s.a.map(x=>`<b>${x}</b>`).join('')}</div></div>`;
+ if(!g.rev){
+  if(g.mode=='i')h+=`<div class=opts>${O.map((o,k)=>`<button onclick="pick(0,${k})">${o}</button>`).join('')}</div>`;
+  else h+=g.pl.map((p,j)=>{const d=g.ch[j]!=null;return `<div class=tr><span class=tn>${esc(p.n)}${d?' ✓':''}</span>${O.map((o,k)=>`<button ${d?'disabled':''} onclick="pick(${j},${k})">${o}</button>`).join('')}</div>`}).join('');
+ }else{
+  h+=`<div class=card>${g.pl.map((p,j)=>{const r=g.res[j];return `<div><b>${esc(p.n)}</b>: ${r.k==null?'no answer in time, 0 pts':`${O[r.k]} (${L[s.r[r.k]]}), +${r.p}${r.b?` incl. ${r.b} speed`:''}`} <span class=mu>· total ${p.s}</span>${g.mode=='t'?` <button ${g.hb[j]?'disabled':''} onclick="hb(${j})">+1 argument</button>`:''}</div>`}).join('')}</div>`;
+  const ord=[0,1,2,3,4,5].sort((a,b)=>s.r[b]-s.r[a]);
+  h+=ord.map(k=>{const w=g.pl.filter((_,j)=>g.ch[j]===k).map(p=>esc(p.n)).join(', ');return `<div class="row r${s.r[k]}"><b>${O[k]}</b><em>${L[s.r[k]]}</em>${w?`<span class=who>← ${w}</span>`:''}<p>${s.n[k]||D[s.r[k]]}</p></div>`}).join('');
+  h+=`<p class=mu>Debate: what would change the best answer if your data access changed?</p><button class=go onclick="next()">${g.i+1<g.q.length?'Next round':'See results'}</button>`;
+ }
+ $('#app').innerHTML=h;tick();
+}
+function reveal(){
+ const g=G,s=g.q[g.i];g.rev=true;g.hb=[];
+ g.res=g.pl.map((p,j)=>{const k=g.ch[j];if(k==null){p.h.push({t:s.t,k:null,p:0});return{k:null,p:0,b:0}}
+  const pt=PT[s.r[k]],b=pt>=6?Math.round(3*g.tl[j]/g.sec):0;p.s+=pt+b;p.h.push({t:s.t,k,p:pt+b});return{k,p:pt+b,b}});
+ render()}
+function hb(j){if(G.hb[j])return;G.hb[j]=1;G.pl[j].s++;render()}
+function next(){const g=G;if(g.i+1>=g.q.length)return end();g.i++;g.ch=[];g.tl=[];g.rev=false;g.t0=Date.now();render()}
+function end(){
+ clearInterval(timer);const g=G,r=[...g.pl].sort((a,b)=>b.s-a.s);
+ if(g.mode=='i'){try{const b=+best()||0;if(r[0].s>b)localStorage.setItem('dd_best',r[0].s)}catch(e){}}
+ const max=g.q.length*13;
+ $('#app').innerHTML=`<h1>${g.mode=='t'?'Final scores':'Your result'}</h1><div class=card><table>${r.map((p,i)=>`<tr><td>${g.mode=='t'?(i+1)+'.':''}</td><td><b>${esc(p.n)}</b></td><td>${p.s} pts</td></tr>`).join('')}</table><p class=mu>Maximum without bonuses: ${g.q.length*10}</p></div>
+ ${g.pl.map(p=>`<div class=card><b>${esc(p.n)}</b><table>${p.h.map(x=>`<tr><td>${x.t}</td><td>${x.k==null?'–':O[x.k]}</td><td>+${x.p}</td></tr>`).join('')}</table></div>`).join('')}
+ <button class=go onclick="setup()">Play again</button>`;
+}
+setup();
+</script></body></html>
