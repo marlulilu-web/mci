@@ -1,2 +1,2 @@
-A qual vs quant exercise for business and management students.
-Bachelor level empirical research methods course.
+Web-based quizzes for business and management students of Qual. Methods.
+Specifically designed for a bachelor level empirical research methods course.
