@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sampling Showdown</title>
+<style>
+:root{--navy:#1B2A49;--teal:#155F7E;--a:#CBD2DB;--b:#E4E8ED;--ok:#2E7D4F;--okbg:#DCEFE3;--bad:#A83232;--badbg:#F4DADA;--mute:#3E4C63;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:#111;font-family:"Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;line-height:1.5;font-size:18px}
+main{max-width:700px;margin:0 auto;padding:28px 18px 48px}
+h1{color:var(--navy);font-weight:400;font-size:2.1rem;line-height:1.15;margin:0 0 .4em}
+h2{color:var(--navy);font-weight:400;font-size:1.4rem;line-height:1.3;margin:.2em 0 .8em}
+p{margin:0 0 1em}
+.mute{color:var(--mute);font-size:.9rem}
+label{display:block;font-weight:700;margin:1em 0 .3em}
+input,textarea{width:100%;font:inherit;padding:10px 12px;border:2px solid var(--a);border-radius:6px;background:#fff;color:#111}
+textarea{min-height:110px;font-size:.9rem;font-family:ui-monospace,Consolas,monospace}
+input:focus,textarea:focus,button:focus-visible,summary:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+button{font:inherit;cursor:pointer;border:0;border-radius:6px;padding:12px 20px;background:var(--teal);color:#fff;font-weight:700}
+button.alt{background:var(--b);color:var(--navy)}
+button:hover{filter:brightness(1.08)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.2em}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{background:var(--b);color:var(--navy);text-align:left;padding:14px;font-weight:400;border:2px solid transparent}
+.mode b{display:block;font-size:1.05rem}
+.mode[aria-pressed=true]{border-color:var(--teal);background:#fff}
+.trail{display:flex;align-items:center;margin:0 0 1.2em}
+.trail i{flex:1;height:2px;background:var(--a)}
+.trail span{width:14px;height:14px;border-radius:50%;background:var(--a);flex:none}
+.trail span.done{background:var(--teal)}.trail span.now{background:var(--navy);transform:scale(1.35)}
+.bar{height:8px;background:var(--b);border-radius:4px;overflow:hidden;margin-bottom:1em}
+.bar div{height:100%;width:100%;background:var(--teal)}
+.opt{display:block;width:100%;text-align:left;background:var(--b);color:#111;font-weight:400;margin-bottom:10px;padding:14px 16px;border:2px solid transparent}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}
+.opt.no{background:var(--badbg);border-color:var(--bad)}
+.opt:disabled{cursor:default;filter:none}
+.fb{background:var(--b);border-radius:6px;padding:14px 16px;margin:14px 0}
+.fb b.ok{color:var(--ok)}.fb b.no{color:var(--bad)}
+.big{font-size:3rem;color:var(--navy);line-height:1;margin:.1em 0}
+table{border-collapse:collapse;width:100%;margin-top:1em}
+th{background:var(--teal);color:#fff;text-align:left;font-style:italic}
+th,td{padding:8px 10px}tr:nth-child(even) td{background:var(--b)}tr:nth-child(odd) td{background:#fff}
+details{margin-top:2.2em;color:var(--mute);font-size:.85rem}
+summary{cursor:pointer}
+details p{margin:.5em 0}
+a{color:var(--teal)}
+@media(max-width:480px){.modes{grid-template-columns:1fr}body{font-size:17px}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+// Correct answer is always listed first here; options are shuffled when a game starts.
+const Q=[
+["Which family of sampling gives every unit a known chance of selection, making statistical inference to a population possible?",["Probability sampling","Purposive sampling","Snowball sampling","Convenience sampling"],"Statistical inference relies on known selection probabilities (Cochran, 1977; Saunders et al., 2019)."],
+["A researcher interviews whichever colleagues happen to be free in the canteen at lunchtime. Which sampling method is this?",["Convenience sampling","Probability sampling","Theoretical sampling","Homogeneous purposive sampling"],"Convenience sampling means choosing whoever is easiest to reach. It is quick, but it does not target the right people."],
+["A market researcher needs 50 men and 50 women, so she approaches whoever is available until each group is full. Which sampling method is this?",["Quota sampling","Simple random sampling","Snowball sampling","Theoretical sampling"],"Quota sampling fills set numbers per category, but people are not picked at random."],
+["A study on menopause recruits only women aged 50 to 55. Which source of homogeneity is this?",["Demographic","Physical","Psychological","Geographical"],"An age range and gender are demographic commonalities (Robinson, 2014)."],
+["Researchers study gifted children and require an IQ over 150. Which source of homogeneity is this?",["Psychological","Demographic","Life history","Physical"],"Selection on a particular trait or ability gives psychological homogeneity (Robinson, 2014)."],
+["You interview founders who have already failed one business and launched a second. Which source of homogeneity is this?",["Life history","Demographic","Geographical","Psychological"],"Participants share a past experience in common, which is life history homogeneity."],
+["Maximum variation sampling is a form of which sampling?",["Heterogeneous purposive","Homogeneous purposive","Theoretical","Systematic"],"You deliberately pick participants who differ, so a theme that survives across all of them is probably robust."],
+["You study freelancers in a hidden gig-work community, and you ask each interviewee to introduce you to someone else they know. Which sampling method is this?",["Snowball sampling","Simple random sampling","Quota sampling","Theoretical sampling"],"Snowball sampling works through referrals, so it suits hidden or hard-to-reach groups."],
+["How does theoretical sampling differ from purposive sampling?",["Its criteria evolve as the analysis develops","Its criteria are fixed before data collection","It is a probability method","It needs a sampling frame"],"Theoretical sampling follows the emerging theory (Glaser & Strauss, 1967), so analysis and sampling run together."],
+["When do you stop sampling in theoretical sampling?",["At theoretical saturation","At 30 participants","When the sampling frame is used up","After one case per category"],"You stop when new data no longer adds to your categories (Charmaz, 2014)."],
+["A bank randomly selects 400 customers from its full customer list to estimate how all its customers feel about a new AI chatbot. Which family of sampling is this?",["Probability sampling","Purposive sampling","Snowball sampling","Convenience sampling"],"Random selection from a full list gives known chances of selection, so the results can be generalised statistically (Saunders et al., 2019)."],
+["To explore how AI tools change managerial work, a researcher deliberately interviews managers from small, medium and large firms across many industries. Which approach is this?",["Heterogeneous purposive sampling","Homogeneous purposive sampling","Convenience sampling","Quota sampling"],"Picking participants who differ on purpose shows which themes hold up across very different situations."]
+];
+const SECS=30, N=Q.length;
+const $=document.getElementById("app");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const enc=s=>btoa(unescape(encodeURIComponent(s)));
+const dec=s=>decodeURIComponent(escape(atob(s)));
+let G={}, timer=null;
+
+const REFS=`<details><summary>Sources behind the questions</summary>
+<p>Charmaz, K. (2014). <i>Constructing grounded theory</i> (2nd ed.). Sage.</p>
+<p>Cochran, W. G. (1977). <i>Sampling techniques</i> (3rd ed.). Wiley.</p>
+<p>Glaser, B. G., &amp; Strauss, A. L. (1967). <i>The discovery of grounded theory: Strategies for qualitative research</i>. Aldine.</p>
+<p>Robinson, O. C. (2014). Sampling in interview-based qualitative research: A theoretical and practical guide. <i>Qualitative Research in Psychology, 11</i>(1), 25&ndash;41.</p>
+<p>Saunders, M., Lewis, P., &amp; Thornhill, A. (2019). <i>Research methods for business students</i> (8th ed.). Pearson.</p></details>`;
+
+function start(){
+  clearInterval(timer);
+  $.innerHTML=`<h1>Sampling Showdown</h1>
+  <p>Twelve questions on the sampling family tree: probability, purposive, snowball and theoretical sampling. You get ${SECS} seconds per question, and faster correct answers score more.</p>
+  <div class="modes" role="group" aria-label="Game mode">
+    <button class="mode" id="m1" aria-pressed="true"><b>Play solo</b>Just you against the clock</button>
+    <button class="mode" id="m2" aria-pressed="false"><b>Play as a team</b>Discuss, agree, then one person taps</button>
+  </div>
+  <label for="nm" id="nl">Your name (optional)</label>
+  <input id="nm" maxlength="30" autocomplete="off">
+  <p class="mute" id="hint" style="margin-top:.8em"></p>
+  <div class="row"><button id="go">Start the game</button><button class="alt" id="host">Facilitator view</button></div>${REFS}`;
+  let mode="solo";
+  const set=m=>{mode=m;$.querySelector("#m1").setAttribute("aria-pressed",m==="solo");$.querySelector("#m2").setAttribute("aria-pressed",m==="team");
+    $.querySelector("#nl").textContent=m==="team"?"Team name (required)":"Your name (optional)";
+    $.querySelector("#hint").textContent=m==="team"?"One device per team. At the end you get a result code to give your facilitator.":"At the end you get a result code you can share if you are playing in a group session."};
+  set("solo");
+  $.querySelector("#m1").onclick=()=>set("solo");
+  $.querySelector("#m2").onclick=()=>set("team");
+  $.querySelector("#host").onclick=host;
+  $.querySelector("#go").onclick=()=>{
+    const name=$.querySelector("#nm").value.trim().replace(/\|/g,"/");
+    if(mode==="team"&&!name){$.querySelector("#nm").focus();$.querySelector("#hint").textContent="Enter a team name to start.";return}
+    G={mode,name:name||"Player",i:0,score:0,ok:0,order:shuffle(Q.map((_,k)=>k))};
+    ask();
+  };
+}
+
+function trail(){
+  return `<div class="trail" aria-label="Question ${G.i+1} of ${N}">`+Q.map((_,k)=>`<span class="${k<G.i?"done":k===G.i?"now":""}"></span>${k<N-1?"<i></i>":""}`).join("")+`</div>`;
+}
+
+function ask(){
+  clearInterval(timer);
+  const q=Q[G.order[G.i]];
+  const opts=shuffle(q[1].map((t,k)=>({t,right:k===0})));
+  $.innerHTML=`${trail()}<p class="mute">${esc(G.name)} &middot; ${G.score} points</p>
+  <div class="bar" aria-hidden="true"><div id="tb"></div></div>
+  <h2>${esc(q[0])}</h2><div id="opts"></div><div id="fb"></div>`;
+  const box=$.querySelector("#opts");
+  opts.forEach(o=>{const b=document.createElement("button");b.className="opt";b.textContent=o.t;b.onclick=()=>answer(b,o,opts,q);box.appendChild(b)});
+  const t0=Date.now();
+  G.t0=t0;
+  timer=setInterval(()=>{
+    const left=Math.max(0,SECS-(Date.now()-t0)/1000);
+    $.querySelector("#tb").style.width=(left/SECS*100)+"%";
+    if(left<=0){clearInterval(timer);answer(null,null,opts,q)}
+  },100);
+}
+
+function answer(btn,o,opts,q){
+  clearInterval(timer);
+  const left=Math.max(0,SECS-(Date.now()-G.t0)/1000);
+  const right=!!(o&&o.right);
+  let gain=0;
+  if(right){gain=100+Math.round(50*left/SECS);G.score+=gain;G.ok++}
+  [...$.querySelectorAll(".opt")].forEach((b,k)=>{b.disabled=true;if(opts[k].right)b.classList.add("ok");else if(b===btn)b.classList.add("no")});
+  const head=right?`<b class="ok">Correct, +${gain} points.</b>`:`<b class="no">${o?"Not quite.":"Time is up."}</b>`;
+  const last=G.i===N-1;
+  $.querySelector("#fb").innerHTML=`<div class="fb">${head} ${esc(q[2])}</div><button id="nx">${last?"See your result":"Next question"}</button>`;
+  const nx=$.querySelector("#nx");nx.focus();
+  nx.onclick=()=>{G.i++;last?finish():ask()};
+}
+
+function finish(){
+  const code=enc([G.name,G.score,G.ok,G.mode].join("|"));
+  const msg=G.ok===N?"A perfect sampling frame.":G.ok>=8?"Strong work. You know your family tree.":G.ok>=5?"Solid base. Review the slides on the questions you missed.":"A good start. Revisit the slides and try again.";
+  $.innerHTML=`<h1>${esc(G.name)}, you scored</h1>
+  <p class="big">${G.score} points</p>
+  <p>${G.ok} of ${N} correct. ${msg}</p>
+  ${G.mode==="team"?`<p><b>Give this result code to your facilitator:</b></p>`:`<p><b>Playing in a group session?</b> Share this result code with your facilitator:</p>`}
+  <textarea id="cd" readonly aria-label="Result code">${code}</textarea>
+  <div class="row"><button id="cp">Copy code</button><button class="alt" id="again">Play again</button></div>${REFS}`;
+  $.querySelector("#cd").onclick=e=>e.target.select();
+  $.querySelector("#cp").onclick=async e=>{
+    try{await navigator.clipboard.writeText(code);e.target.textContent="Copied"}catch(_){$.querySelector("#cd").select();e.target.textContent="Press Ctrl+C to copy"}
+  };
+  $.querySelector("#again").onclick=start;
+}
+
+function host(){
+  $.innerHTML=`<h1>Facilitator view</h1>
+  <p>Paste the result codes your teams send you, one per line, then rank them.</p>
+  <label for="codes">Result codes</label><textarea id="codes"></textarea>
+  <div class="row"><button id="rank">Rank teams</button><button class="alt" id="back">Back to the game</button></div>
+  <div id="out"></div>`;
+  $.querySelector("#back").onclick=start;
+  $.querySelector("#rank").onclick=()=>{
+    const rows=[];let bad=0;
+    $.querySelector("#codes").value.split(/\s+/).filter(Boolean).forEach(c=>{
+      try{const [n,s,k,m]=dec(c).split("|");if(isNaN(+s)||isNaN(+k))throw 0;rows.push({n,s:+s,k:+k,m})}catch(_){bad++}
+    });
+    rows.sort((a,b)=>b.s-a.s||b.k-a.k);
+    $.querySelector("#out").innerHTML=rows.length?`<table><thead><tr><th>Rank</th><th>Name</th><th>Correct</th><th>Points</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.n)}${r.m==="team"?" (team)":""}</td><td>${r.k}/${N}</td><td>${r.s}</td></tr>`).join("")}</tbody></table>${bad?`<p class="mute">${bad} code(s) could not be read.</p>`:""}`:`<p class="mute">No valid codes found. Check that each code was pasted in full.</p>`;
+  };
+}
+start();
+</script>
+</body>
+</html>
